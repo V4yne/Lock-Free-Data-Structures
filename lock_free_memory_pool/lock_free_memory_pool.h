@@ -25,8 +25,6 @@ class LockFreeMemoryPool {
         delete[] is_allocated_;
     }
 
-    // todo: allocate
-    // todo: deallocate
     T* allocate() {
         __uint128_t old_head;
         __uint128_t new_head;
@@ -54,7 +52,6 @@ class LockFreeMemoryPool {
             printf("This memory_node has been deallocated.\n");
             return;
         }
-        // printf("%d\n", *node);
         __uint128_t old_head;
         __uint128_t new_head;
         do {
@@ -99,4 +96,6 @@ class LockFreeMemoryPool {
 };
 }  // namespace LockFreeDataStructure
 
-// use version to avoid ABA case
+/*
+    use version to avoid ABA case
+*/
