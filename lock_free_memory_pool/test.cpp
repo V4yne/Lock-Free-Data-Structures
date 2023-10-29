@@ -9,8 +9,11 @@ int main() {
     for (int i = 0; i < 10; i++) {
         printf("%d\n", *ptrs[i]);
     }
+    printf("%d\n", ptrs[3]);
     int_memory_pool.deallocate(ptrs[3]);
     printf("debug: here\n");
+    ptrs[3] = int_memory_pool.allocate();
+    printf("%d\n", ptrs[3]);
     int_memory_pool.deallocate(ptrs[3]);
     return 0;
 }
