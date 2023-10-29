@@ -17,6 +17,7 @@ class LockFreeMemoryPool {
         pool_[pool_size_ - 1].next = nullptr;
         is_allocated_[pool_size_ - 1].store(false);
         free_node_head_.store(PackVersionPtr(0, pool_));
+        allocated_size_.store(0);
     }
 
     ~LockFreeMemoryPool() {
@@ -33,11 +34,13 @@ class LockFreeMemoryPool {
             old_head = free_node_head_.load();
             __uint128_t old_version = GetVersion(old_head);
             Memory_Node* old_ptr = GetPtr(old_head);
+            if (old_ptr == nullptr) return nullptr;
             new_head = PackVersionPtr(old_version + 1, old_ptr->next);
         } while (free_node_head_.compare_exchange_strong(old_head, new_head) ==
                  false);
         Memory_Node* old_ptr = GetPtr(old_head);
         is_allocated_[old_ptr - pool_].store(true);
+        allocated_size_.fetch_add(1);
         return &(old_ptr->data);
     }
 
@@ -62,7 +65,10 @@ class LockFreeMemoryPool {
             new_head = PackVersionPtr(version + 1, node_ptr);
         } while (free_node_head_.compare_exchange_strong(old_head, new_head) ==
                  false);
+        allocated_size_.fetch_sub(1);
     }
+
+    void print_allocated_size() { printf("%lld\n", allocated_size_.load()); }
 
    private:
     struct Memory_Node {
@@ -74,6 +80,7 @@ class LockFreeMemoryPool {
     Memory_Node* pool_;
 
     std::atomic<bool>* is_allocated_;
+    std::atomic<__uint32_t> allocated_size_;
 
     std::atomic<__uint128_t> free_node_head_;
 
